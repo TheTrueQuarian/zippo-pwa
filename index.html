@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, user-scalable=no,initial-scale=1.0, maximum-scale=1.0-ui" />
+    <meta name="theme-color" content="#ff4500">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-128.png">
+    
+    <title>Zip Plus</title>
+</head>
+<style>
+    #flexcontainer{
+        display:flex;
+        flex-direction: column;
+        width:80%;
+        justify-content: center;
+        margin-left:auto;
+        margin-right: auto;
+       
+
+    }
+    #zip, #citystate,#city,#thezip{
+        background-color: linen;
+        width:80%;
+        margin-top: 2%;
+        padding-bottom: 5%;
+        text-align: center;
+
+    }
+
+
+</style>
+
+<body>
+    <div id="flexcontainer">
+
+    <div id="zip">Enter zip code <br>
+        <input type=number id='zipcode'><br><br>
+        <button id="btn">Get city state</button>
+    </div>
+
+    <div id="citystate">City and State are <br>
+        <p id="cityandstate"></p>
+    </div>
+
+   
+
+    <div id="city">Enter city <br>
+        <input type=text id="cityarea"><br>
+        Enter state<br>
+        <input type=text id="statearea"><br><br>
+        <button id="btnzip">Get zip</button>
+    </div>
+
+    <div id="thezip">zip code is<br>
+        <p id="zipanswer"></p>
+    </div>
+</div>
+    
+<script>
+//api.zippopotam.us/US/00210
+
+if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').then(reg => {
+                console.log('Successfully registered');
+            }).catch(err => {
+                console.log('Error while registering SW')
+            });
+        }
+
+window.addEventListener('load',start);
+    
+function start(){
+    document.getElementById('btn').addEventListener('click',getCityState);   document.getElementById('btnzip').addEventListener('click',getZip);
+}
+
+function getCityState(evt) {
+            var zipCode = document.getElementById("zipcode").value;
+            console.log(zipCode);
+            var ajaxRequest = new XMLHttpRequest();
+            ajaxRequest.onreadystatechange = function () {
+                if (ajaxRequest.readyState == 4) {
+                    console.log("Done loading!");
+                    if (ajaxRequest.status == 200) {
+                        //our file has loaded!
+                        var cityStateObj=  JSON.parse(ajaxRequest.responseText);
+                        var output = document.getElementById('cityandstate');
+                        var city = cityStateObj.places[0]['place name'];
+                        var state =cityStateObj.places[0].state;
+                        output.innerHTML=city + " " + state;
+                    }
+                    else {
+                        console.log("Status error: " + ajaxRequest.status);
+                    }
+                }
+                else {
+                    console.log("Something went wrong. :(");
+                }
+            }
+            var url = "https://api.zippopotam.us/us/" + zipCode;
+            console.log(url);
+            ajaxRequest.open("GET", url, true);
+            ajaxRequest.send();
+        }
+    
+function getZip(evt) {
+            var city = document.getElementById("cityarea").value;
+            var state = document.getElementById("statearea").value;
+            console.log(city);
+            console.log(state);
+            var ajaxRequest = new XMLHttpRequest();
+            ajaxRequest.onreadystatechange = function () {
+                if (ajaxRequest.readyState == 4) {
+                    console.log("Done loading!");
+                    if (ajaxRequest.status == 200) {
+                        //our file has loaded!
+                        var zipObj=  JSON.parse(ajaxRequest.responseText);
+                        var output = document.getElementById('zipanswer');
+                        var zip = zipObj.places[0]['post code'];
+                        output.innerHTML=zip;
+                    }
+                    else {
+                        console.log("Status error: " + ajaxRequest.status);
+                    }
+                }
+                else {
+                    console.log("Something went wrong. :(");
+                }
+            }
+            var url = "https://api.zippopotam.us/US/" + state + "/" + city;
+            console.log(url);
+            ajaxRequest.open("GET", url, true);
+            ajaxRequest.send();
+        }
+</script>
+
+
+</body>
+
+</html>
